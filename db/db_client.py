@@ -38,8 +38,5 @@ def get_pending_reviews() -> list[dict]:
 
 def get_available_cohorts() -> list[dict]:
     supabase = get_client()
-    result = supabase.table("cohorts") \
-        .select("*") \
-        .lt("current_enrollment", supabase.column("max_capacity")) \
-        .execute()
-    return result.data
+    result = supabase.table("cohorts").select("*").execute()
+    return [c for c in result.data if c["current_enrollment"] < c["max_capacity"]]
