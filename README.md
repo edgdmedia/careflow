@@ -1,10 +1,8 @@
 # CareFlow — Autonomous Therapy Intake & Session Management Agent
 
-An autonomous AI agent pipeline that handles the full pre- and post-session workflow for group therapy programs. Built for the Qwen Cloud Global AI Hackathon (Track 4: Autopilot Agent).
+CareFlow is an autonomous AI agent that handles the full pre- and post-session therapy workflow — from first inquiry to session log — with zero manual admin. Built and demonstrated using Anxiety Unplugged, a live group therapy program, as the reference implementation.
 
-**Problem:** Therapists spend hours on intake forms, scheduling, reminders, and session documentation — time that should go to client care.
-
-**Solution:** CareFlow chains five AI agents (Intake → Eligibility → Scheduling → Pre-Session → Post-Session) powered by Qwen Cloud, with a human-in-the-loop checkpoint at the eligibility gate.
+Built for the Qwen Cloud Global AI Hackathon (Track 4: Autopilot Agent).
 
 ## Project Status
 
