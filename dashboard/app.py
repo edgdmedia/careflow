@@ -4,10 +4,18 @@ from datetime import datetime
 
 import streamlit as st
 import pandas as pd
+from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-os.environ["SUPABASE_URL"] = st.secrets.get("SUPABASE_URL") or os.environ.get("SUPABASE_URL", "")
-os.environ["SUPABASE_KEY"] = st.secrets.get("SUPABASE_KEY") or os.environ.get("SUPABASE_KEY", "")
+load_dotenv()
+
+try:
+    secrets = st.secrets
+except Exception:
+    secrets = {}
+
+os.environ["SUPABASE_URL"] = os.environ.get("SUPABASE_URL") or secrets.get("SUPABASE_URL", "")
+os.environ["SUPABASE_KEY"] = os.environ.get("SUPABASE_KEY") or secrets.get("SUPABASE_KEY", "")
 
 from db.db_client import (
     get_all_participants,
