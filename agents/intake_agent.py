@@ -1,7 +1,6 @@
 import json
-import os
-import re
-from openai import OpenAI
+
+from shared.client import get_qwen_client
 
 CRISIS_KEYWORDS = [
     "suicide", "kill myself", "end my life", "want to die",
@@ -17,34 +16,35 @@ If multiple concerns are mentioned, capture the primary one in presenting_concer
 
 If no name is given, set name to null and ask for it in the suggested_next_question."""
 
-QC_CRISIS_KEYWORDS = [
-    "suicid", "kill myself", "end my life", "want to die",
-    "self-harm", "self harm", "cutting", "not safe",
-    "hurt myself", "hurting myself", "don't want to be here",
-]
 
 def _has_crisis_keywords(text: str) -> bool:
     text_lower = text.lower()
-    return any(re.search(pattern, text_lower) for pattern in CRISIS_KEYWORDS)
+    return any(pattern in text_lower for pattern in CRISIS_KEYWORDS)
 
 
 def run_intake_agent(message: str) -> dict:
-    client = OpenAI(
-        api_key=os.getenv("DASHSCOPE_API_KEY"),
-        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-    )
-
-    completion = client.chat.completions.create(
-        model="qwen3.7-plus",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": message},
-        ],
-        response_format={"type": "json_object"},
-    )
-
-    raw = completion.choices[0].message.content
-    result = json.loads(raw)
+    try:
+        client = get_qwen_client()
+        completion = client.chat.completions.create(
+            model="qwen3.7-plus",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": message},
+            ],
+            response_format={"type": "json_object"},
+        )
+        raw = completion.choices[0].message.content
+        result = json.loads(raw)
+    except Exception as e:
+        return {
+            "error": str(e),
+            "name": None,
+            "presenting_concern": None,
+            "urgency_level": "unknown",
+            "requires_immediate_escalation": False,
+            "secondary_concerns": [],
+            "suggested_next_question": "I'm sorry, we're experiencing a technical issue. Please try again or contact us directly.",
+        }
 
     if _has_crisis_keywords(message):
         result["requires_immediate_escalation"] = True
