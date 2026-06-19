@@ -8,12 +8,14 @@ An autonomous AI agent pipeline that handles the full pre- and post-session work
 
 ## Project Status
 
-- [x] Intake Agent — prototype validated
-- [ ] Eligibility Agent
-- [ ] Scheduling Agent
-- [ ] Pre-Session Agent
-- [ ] Post-Session Agent
-- [ ] Therapist Dashboard
+- [x] Intake Agent — Qwen NLP extraction + crisis keyword fallback
+- [x] Eligibility Agent — approve/flag/decline against group criteria
+- [x] Scheduling Agent — cohort slot assignment + warm confirmation
+- [x] Pre-Session Agent — 24hr reminder + 1-10 mood check-in
+- [x] Post-Session Agent — worksheet delivery + feedback + session log
+- [x] Therapist Dashboard — Streamlit (6 tabs: overview, participants, pending reviews, cohorts, session logs, agent runs)
+- [x] Human-in-the-Loop Gate — crisis escalation + eligibility review queue
+- [x] E2E Pipeline — `python pipeline/run_pipeline.py "message"`
 
 ## Tech Stack
 
