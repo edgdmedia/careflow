@@ -1,6 +1,8 @@
-# CareFlow — Autonomous Therapy Intake & Session Management Agent
+# CareFlow — Autonomous Therapy Operations Agent
 
-CareFlow is an autonomous AI agent that handles the full pre- and post-session therapy workflow — from first inquiry to session log — with zero manual admin. Built and demonstrated using Anxiety Unplugged, a live group therapy program, as the reference implementation.
+CareFlow is an autonomous AI agent that reduces therapist admin across the full care journey — from first inquiry to follow-up — with near-zero manual coordination for standard cases.
+
+This version is built and demonstrated through **Anxiety Unplugged**, a live group therapy program, as the reference implementation. That gives the product a concrete real-world workflow today, while the underlying architecture is designed to extend to individual therapy, support groups, and other therapist-led programs.
 
 Built for the Qwen Cloud Global AI Hackathon (Track 4: Autopilot Agent).
 

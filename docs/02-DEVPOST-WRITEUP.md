@@ -18,9 +18,8 @@ Copy each section directly into the corresponding Devpost submission field.
 
 ## Tagline / Short Description
 
-CareFlow is an autonomous AI agent that handles the full therapy intake and session
-management workflow — from first message to session log — so therapists can focus
-entirely on their clients.
+CareFlow is an autonomous therapy operations agent that reduces therapist admin from
+first inquiry to follow-up, so clinicians can spend more time delivering care.
 
 ---
 
@@ -35,36 +34,41 @@ acute.
 
 We built CareFlow because we experienced this problem firsthand. Running a group
 therapy program called *Anxiety Unplugged* — a six-week anxiety recovery series — we
-found that the logistics of intake, scheduling, and post-session follow-up consumed
-hours that should have gone toward preparation and presence. CareFlow automates that
-entire operational layer, so a therapist can take on more clients, document hours
-accurately, and deliver better care without drowning in admin.
+found that the logistics of intake, screening, scheduling, reminders, and post-session
+follow-up consumed hours that should have gone toward preparation and presence.
+
+That became the starting point for a broader idea: therapists everywhere deal with the
+same operational burden, whether they run group programs, individual practices, support
+groups, or psychoeducation cohorts. CareFlow automates that operational layer so a
+therapist can take on more clients, document hours accurately, and deliver better care
+without drowning in admin.
 
 ---
 
 ## What It Does
 
-CareFlow is a multi-step autonomous agent pipeline that manages the complete pre- and
-post-session workflow for group or individual therapists:
+CareFlow is a multi-step autonomous agent pipeline that manages the complete therapy
+operations workflow for therapists. In this hackathon build, it is demonstrated through
+a live group therapy program, but the same architecture is designed for broader
+therapist workflows:
 
 - **Intake Agent** — Receives free-text inquiries via WhatsApp, web form, or email.
-  Uses Qwen NLP to extract presenting concern, name, and availability through a
-  natural conversation — no rigid forms.
-- **Eligibility Agent** — Screens participants against group therapy criteria. Flags
-  edge cases for therapist review before any scheduling occurs (human-in-the-loop
-  checkpoint).
-- **Scheduling Agent** — Assigns participants to available cohort slots, sends
-  confirmation messages with onboarding info, and updates cohort enrollment
-  automatically.
-- **Pre-Session Agent** — Sends reminders and short check-in questions 24 hours before
-  each session. Surfaces participant mood data to the therapist before the session
-  starts.
-- **Post-Session Agent** — Delivers session worksheets, collects feedback, logs
-  attendance, and updates the therapist's training hours tracker for licensing
-  compliance.
+  Uses Qwen NLP to extract presenting concern, name, and urgency through a natural
+  conversation instead of rigid forms.
+- **Eligibility Agent** — Screens participants against program criteria and flags edge
+  cases for therapist review before any scheduling occurs.
+- **Scheduling Agent** — Assigns participants to the right available slot, sends
+  confirmation messages, and updates program enrollment automatically.
+- **Pre-Session Agent** — Sends reminders and short check-in questions before sessions,
+  surfacing participant state to the therapist in advance.
+- **Post-Session Agent** — Delivers worksheets, collects feedback, logs attendance,
+  and updates the therapist's documentation trail.
 - **Therapist Dashboard** — A clean Streamlit interface showing participant progress,
-  cohort overview, session logs, pending reviews, and training hours — with all
-  data populated by the agents, never manually entered.
+  pending reviews, cohort or caseload status, session logs, and agent activity.
+
+In the current demo, these workflows are implemented for **Anxiety Unplugged**, a
+group therapy program. But the same pattern maps naturally to individual therapy intake,
+support groups, coaching programs, and therapist-in-training documentation workflows.
 
 ---
 
@@ -83,8 +87,8 @@ reads directly from Supabase.
 
 A crisis keyword detection fallback runs alongside the Qwen-powered intake to ensure
 suicidal ideation and self-harm mentions are never missed by the model alone. The
-pipeline auto-escalates crisis cases to the therapist and blocks scheduling until
-human review.
+pipeline auto-escalates crisis cases to the therapist and blocks further workflow steps
+until human review.
 
 Each agent in the pipeline is designed so that any single agent can be paused,
 overridden, or extended without rebuilding the pipeline. This modularity means
@@ -121,6 +125,8 @@ mental health services.
 - A culturally-grounded intake experience: the agent's conversational style was
   calibrated for warmth and accessibility, not clinical distance — reflecting the
   values of the Unclutter mental wellness platform it's built for.
+- A product framing that starts from a real live program but extends to everyday
+  therapist operations more broadly.
 
 ---
 
@@ -141,13 +147,13 @@ expectations.
 ## What's Next for CareFlow
 
 - Integration with the full **Unclutter app suite** as the operational backbone for
-  all group therapy programs
+  group programs, intake operations, and therapist-facing workflows
 - **Voice intake** using Qwen's multimodal capabilities — so participants can leave a
   voice note rather than typing
 - **Outcome tracking** — longitudinal mood and progress data across a participant's
   full program journey
-- An **open-source release** of the core agent pipeline, enabling other therapists
-  and mental health organisations to deploy CareFlow for their own programs
+- An **open-source release** of the core agent pipeline, enabling therapists and mental
+  health organisations to adapt CareFlow for their own programs and practice workflows
 
 ---
 
