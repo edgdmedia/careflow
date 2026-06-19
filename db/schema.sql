@@ -2,6 +2,20 @@
 -- CareFlow — PostgreSQL Schema (Supabase)
 -- =========================================
 
+-- COHORTS (must exist before participants references it)
+CREATE TABLE cohorts (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            TEXT NOT NULL,
+    program_name    TEXT DEFAULT 'Anxiety Unplugged',
+    start_date      DATE,
+    day_of_week     TEXT,
+    time_slot       TEXT,
+    max_capacity    INTEGER DEFAULT 8,
+    current_enrollment INTEGER DEFAULT 0,
+    facilitator_id  UUID,
+    created_at      TIMESTAMPTZ DEFAULT now()
+);
+
 -- PARTICIPANTS
 CREATE TABLE participants (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -16,20 +30,6 @@ CREATE TABLE participants (
     assigned_cohort_id UUID REFERENCES cohorts(id),
     created_at      TIMESTAMPTZ DEFAULT now(),
     updated_at      TIMESTAMPTZ DEFAULT now()
-);
-
--- COHORTS
-CREATE TABLE cohorts (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name            TEXT NOT NULL,
-    program_name    TEXT DEFAULT 'Anxiety Unplugged',
-    start_date      DATE,
-    day_of_week     TEXT,
-    time_slot       TEXT,
-    max_capacity    INTEGER DEFAULT 8,
-    current_enrollment INTEGER DEFAULT 0,
-    facilitator_id  UUID,
-    created_at      TIMESTAMPTZ DEFAULT now()
 );
 
 -- ELIGIBILITY REVIEWS (human-in-the-loop log)
@@ -77,3 +77,7 @@ CREATE TABLE agent_runs (
 CREATE INDEX idx_participants_eligibility_status ON participants(eligibility_status);
 CREATE INDEX idx_session_logs_participant ON session_logs(participant_id);
 CREATE INDEX idx_agent_runs_agent_name ON agent_runs(agent_name);
+
+-- SEED DATA (cohort for demo)
+INSERT INTO cohorts (name, program_name, start_date, day_of_week, time_slot, max_capacity)
+VALUES ('Tuesday 6pm - Cohort 3', 'Anxiety Unplugged', '2026-07-15', 'Tuesday', '18:00', 8);
