@@ -1,0 +1,36 @@
+{
+  "program": "Anxiety Unplugged",
+  "total_sessions": 6,
+  "worksheets": {
+    "1": {
+      "title": "Understanding Anxiety",
+      "file": "session-01-understanding-anxiety.md",
+      "theme": "What anxiety is and how it shows up in your body"
+    },
+    "2": {
+      "title": "Naming Your Anxiety Triggers",
+      "file": "session-02-naming-triggers.md",
+      "theme": "Identifying the situations and thoughts that trigger anxiety"
+    },
+    "3": {
+      "title": "Challenging Anxious Thoughts",
+      "file": "session-03-challenging-thoughts.md",
+      "theme": "Using CBT techniques to reframe distorted thinking"
+    },
+    "4": {
+      "title": "Building Coping Strategies",
+      "file": "session-04-coping-strategies.md",
+      "theme": "Developing a personal toolkit for managing anxiety in the moment"
+    },
+    "5": {
+      "title": "Exposure & Growth",
+      "file": "session-05-exposure-growth.md",
+      "theme": "Gradual exposure to feared situations and building confidence"
+    },
+    "6": {
+      "title": "Relapse Prevention & Next Steps",
+      "file": "session-06-relapse-prevention.md",
+      "theme": "Creating a maintenance plan and celebrating progress"
+    }
+  }
+}

@@ -81,3 +81,27 @@ def insert_session_log(data: dict) -> dict:
     supabase = get_client()
     result = supabase.table("session_logs").insert(data).execute()
     return result.data[0]
+
+
+def get_all_participants() -> list[dict]:
+    supabase = get_client()
+    result = supabase.table("participants").select("*").order("created_at", desc=True).execute()
+    return result.data
+
+
+def get_all_cohorts() -> list[dict]:
+    supabase = get_client()
+    result = supabase.table("cohorts").select("*").execute()
+    return result.data
+
+
+def get_all_session_logs() -> list[dict]:
+    supabase = get_client()
+    result = supabase.table("session_logs").select("*, participants(name)").order("created_at", desc=True).execute()
+    return result.data
+
+
+def get_agent_runs(limit: int = 20) -> list[dict]:
+    supabase = get_client()
+    result = supabase.table("agent_runs").select("*").order("created_at", desc=True).limit(limit).execute()
+    return result.data
