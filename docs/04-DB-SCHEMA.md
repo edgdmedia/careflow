@@ -1,21 +1,24 @@
 # CareFlow — Database Schema
 
 PostgreSQL schema for Supabase. Copy the SQL block into Supabase's SQL editor to
-create all tables at once, or save it as `db/schema.sql` and run it via your
-preferred Postgres client.
+create all tables at once. **(Note: `cohorts` must be created before `participants`
+due to the foreign key reference.)**
+
+> ✅ Supabase project is live. Schema has been applied. RLS is disabled for the
+> hackathon (re-enable before production).
 
 ---
 
 ## Entity Overview
 
 ```
+cohorts ──────────────────> participants (assigned_cohort_id)
+                              │
 participants ──┬──> session_logs
                │
                └──> eligibility_reviews
 
-cohorts ───────┴──> participants (assigned_cohort_id)
-
-agent_runs (audit log of every agent call, for debugging + demo transparency)
+agent_runs (audit log of every agent call)
 ```
 
 ---
@@ -23,6 +26,22 @@ agent_runs (audit log of every agent call, for debugging + demo transparency)
 ## Full SQL Schema
 
 ```sql
+-- =========================================
+-- COHORTS (must exist first)
+-- =========================================
+CREATE TABLE cohorts (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            TEXT NOT NULL,        -- e.g. "Tuesday 6pm - Cohort 3"
+    program_name    TEXT DEFAULT 'Anxiety Unplugged',
+    start_date      DATE,
+    day_of_week     TEXT,
+    time_slot       TEXT,
+    max_capacity    INTEGER DEFAULT 8,
+    current_enrollment INTEGER DEFAULT 0,
+    facilitator_id  UUID,
+    created_at      TIMESTAMPTZ DEFAULT now()
+);
+
 -- =========================================
 -- PARTICIPANTS
 -- =========================================
@@ -42,22 +61,6 @@ CREATE TABLE participants (
 );
 
 -- =========================================
--- COHORTS
--- =========================================
-CREATE TABLE cohorts (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name            TEXT NOT NULL,        -- e.g. "Tuesday 6pm - Cohort 3"
-    program_name    TEXT DEFAULT 'Anxiety Unplugged',
-    start_date      DATE,
-    day_of_week     TEXT,
-    time_slot       TEXT,
-    max_capacity    INTEGER DEFAULT 8,
-    current_enrollment INTEGER DEFAULT 0,
-    facilitator_id  UUID,
-    created_at      TIMESTAMPTZ DEFAULT now()
-);
-
--- =========================================
 -- ELIGIBILITY REVIEWS (human-in-the-loop log)
 -- =========================================
 CREATE TABLE eligibility_reviews (
@@ -66,7 +69,7 @@ CREATE TABLE eligibility_reviews (
     agent_decision  TEXT,                 -- 'approved' | 'flagged_for_review' | 'declined'
     agent_reasoning TEXT,
     urgent_flag     BOOLEAN DEFAULT FALSE,
-    human_override  TEXT,                 -- null until therapist reviews; same enum as agent_decision
+    human_override  TEXT,                 -- null until therapist reviews
     reviewed_by     TEXT,
     reviewed_at     TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT now()
@@ -94,7 +97,7 @@ CREATE TABLE session_logs (
 -- =========================================
 CREATE TABLE agent_runs (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    agent_name      TEXT NOT NULL,        -- 'intake' | 'eligibility' | 'scheduling' | 'pre_session' | 'post_session'
+    agent_name      TEXT NOT NULL,        -- 'intake' | 'eligibility' | 'scheduling'
     participant_id  UUID REFERENCES participants(id),
     input_payload   JSONB,
     output_payload  JSONB,
@@ -105,11 +108,17 @@ CREATE TABLE agent_runs (
 );
 
 -- =========================================
--- INDEXES (for dashboard query performance)
+-- INDEXES
 -- =========================================
 CREATE INDEX idx_participants_eligibility_status ON participants(eligibility_status);
 CREATE INDEX idx_session_logs_participant ON session_logs(participant_id);
 CREATE INDEX idx_agent_runs_agent_name ON agent_runs(agent_name);
+
+-- =========================================
+-- SEED DATA
+-- =========================================
+INSERT INTO cohorts (name, program_name, start_date, day_of_week, time_slot, max_capacity)
+VALUES ('Tuesday 6pm - Cohort 3', 'Anxiety Unplugged', '2026-07-15', 'Tuesday', '18:00', 8);
 ```
 
 ---
@@ -118,24 +127,20 @@ CREATE INDEX idx_agent_runs_agent_name ON agent_runs(agent_name);
 
 - **`requires_immediate_escalation`** on `participants` — a dedicated boolean
   separate from `urgency_level`, so your dashboard can filter for true crisis cases
-  with a single simple query, independent of the more nuanced urgency scale.
+  with a single simple query.
 
 - **`eligibility_reviews.human_override`** — kept separate from `agent_decision` so
   you always retain the agent's original reasoning even after a therapist overrides
-  it. This is valuable both for your demo narrative (showing the human-in-the-loop
-  actually working) and for any future audit/compliance need.
+  it. Used in the dashboard approve/decline workflow.
 
-- **`agent_runs`** — this table is not strictly necessary for the product to function,
-  but it is extremely valuable for:
-  1. Debugging during the hackathon build
-  2. Demonstrating "Technical Depth" in your demo video — you can literally show this
-     table populating live as agents run
-  3. Long-term: a foundation for prompt evaluation/improvement once in production
+- **`agent_runs`** — audit log table. Populated live by `pipeline/run_pipeline.py`.
+  Valuable for debugging, demo transparency, and future prompt evaluation.
 
-- **`cohorts.current_enrollment`** — denormalized counter rather than always
-  `COUNT()`-ing participants. Simpler for a fast solo build; update it manually in
-  your scheduling agent's database write rather than building a trigger (triggers
-  add complexity you don't need for a hackathon timeline).
+- **`cohorts.current_enrollment`** — denormalized counter. Updated by the pipeline
+  after scheduling. Simpler than a trigger for a hackathon timeline.
+
+- **Cohort table order** — defined before `participants` in the SQL to avoid
+  `relation "cohorts" does not exist` errors on the foreign key.
 
 ---
 
@@ -149,30 +154,13 @@ CREATE INDEX idx_agent_runs_agent_name ON agent_runs(agent_name);
    SUPABASE_URL=your_project_url
    SUPABASE_KEY=your_anon_key
    ```
-5. Install the Python client: `pip install supabase`
-6. Test the connection with a simple `db_client.py`:
-
-```python
-import os
-from supabase import create_client
-
-url = os.environ.get("SUPABASE_URL")
-key = os.environ.get("SUPABASE_KEY")
-supabase = create_client(url, key)
-
-# Quick test
-response = supabase.table("cohorts").select("*").execute()
-print(response.data)
-```
-
----
-
-## Seed Data for Demo (Optional but Recommended)
-
-Before recording your demo video, seed at least one cohort so the Scheduling Agent
-has something real to assign participants to:
-
-```sql
-INSERT INTO cohorts (name, program_name, start_date, day_of_week, time_slot, max_capacity)
-VALUES ('Tuesday 6pm - Cohort 3', 'Anxiety Unplugged', '2026-07-15', 'Tuesday', '18:00', 8);
-```
+5. Disable RLS for hackathon:
+   ```sql
+   ALTER TABLE cohorts DISABLE ROW LEVEL SECURITY;
+   ALTER TABLE participants DISABLE ROW LEVEL SECURITY;
+   ALTER TABLE eligibility_reviews DISABLE ROW LEVEL SECURITY;
+   ALTER TABLE session_logs DISABLE ROW LEVEL SECURITY;
+   ALTER TABLE agent_runs DISABLE ROW LEVEL SECURITY;
+   ```
+6. Install the Python client: `pip install supabase`
+7. Test: `from db.db_client import get_all_cohorts; print(get_all_cohorts())`

@@ -5,7 +5,7 @@
 **Track:** Track 4 — Autopilot Agent
 **Deadline:** July 9, 2026, 2:00pm PDT
 **Builder:** Olalekan Owonikoko (solo build)
-**Status:** Intake Agent prototype validated ✅ (Day 1 complete)
+**Status:** Phases 0–3 complete ✅ (dashboard built, pipeline end-to-end working)
 
 ---
 
@@ -34,18 +34,13 @@ design decision in the project: agents handle logistics, humans handle clinical 
 
 | Layer | Technology | Why |
 |---|---|---|
-| AI reasoning | Qwen Cloud API (`qwen3.7-plus` or similar) | Required for hackathon; OpenAI-compatible, strong NLP extraction |
+| AI reasoning | Qwen Cloud API (`qwen3.7-plus`) | Required for hackathon; OpenAI-compatible, strong NLP extraction |
 | Backend deploy | Alibaba Cloud ECS | **Required** for hackathon submission proof |
-| Orchestration | n8n (self-hosted on ECS) or plain Python scripts chained together | n8n = visual, faster for solo demo; Python = more control |
-| Database | PostgreSQL (Supabase free tier) | Already familiar to Olalekan; generous free tier |
-| Frontend dashboard | Next.js (minimal) or Streamlit (faster for solo) | Streamlit recommended for time constraints |
-| Comms | WhatsApp Business API or simple email (SMTP) for demo | WhatsApp ideal but email is faster to wire up solo |
-| Calendar | Google Calendar API (optional for MVP — can mock for demo) | Nice-to-have, not core to passing judging criteria |
-
-**Solo-build recommendation:** Skip n8n and Next.js for the first working version.
-Build the agent pipeline in plain Python first (faster to debug alone), get it working
-end-to-end, THEN wrap it in a dashboard (Streamlit) once the logic is proven. This is
-the fastest path to a working demo within 21 days.
+| Orchestration | Python pipeline (`pipeline/run_pipeline.py`) | Chained agent calls with HITL gate, error handling, DB logging |
+| Database | PostgreSQL (Supabase free tier) | Already familiar; generous free tier |
+| Frontend dashboard | Streamlit | Fastest path to a solo-built dashboard with live DB reads |
+| Comms | Email/WhatsApp (mocked for demo) | Pipeline generates messages; delivery channel TBD |
+| Calendar | Google Calendar API (optional — not yet integrated) | Nice-to-have for post-submission |
 
 ---
 
@@ -54,133 +49,115 @@ the fastest path to a working demo within 21 days.
 ```
 careflow/
 ├── .env                          # API keys (never commit this)
+├── .env.example                  # Template for .env
 ├── .gitignore
 ├── README.md                     # public-facing repo description
-├── opencode.json                 # OpenCode + Qwen Cloud config
 ├── requirements.txt
 ├── agents/
 │   ├── __init__.py
-│   ├── intake_agent.py
-│   ├── eligibility_agent.py
-│   ├── scheduling_agent.py
-│   ├── pre_session_agent.py
-│   └── post_session_agent.py
+│   ├── intake_agent.py           # Qwen NLP extraction + crisis keyword fallback
+│   ├── eligibility_agent.py      # Approve/flag/decline against criteria
+│   ├── scheduling_agent.py       # Cohort slot assignment + confirmation
+│   ├── pre_session_agent.py      # Reminder + 1-10 check-in
+│   └── post_session_agent.py     # Feedback + worksheet + session log
 ├── db/
-│   ├── schema.sql
-│   └── db_client.py
+│   ├── schema.sql                # Full Postgres schema + seed data
+│   └── db_client.py              # Supabase client with query helpers
 ├── pipeline/
-│   └── run_pipeline.py           # chains all agents together
+│   └── run_pipeline.py           # CLI: run, review, approve, pre/post cycles
 ├── dashboard/
-│   └── app.py                    # Streamlit dashboard (Phase 3)
+│   └── app.py                    # Streamlit dashboard (6 tabs)
 ├── tests/
 │   ├── test_intake.py
-│   ├── test_eligibility.py
-│   └── sample_messages.json      # test inquiries for demo
+│   └── sample_messages.json      # 5 test scenarios
 ├── docs/
-│   ├── architecture-diagram.png  # exported from hackathon pack
-│   └── alibaba-deployment-proof.md
+│   ├── 01-BUILD-PLAN.md          # This file
+│   ├── 02-DEVPOST-WRITEUP.md     # Devpost submission text
+│   ├── 03-AGENT-SPECS.md         # Detailed agent specs
+│   ├── 04-DB-SCHEMA.md           # Schema + rationale
+│   └── info.html                 # Hackathon info pack
 └── content/
     ├── eligibility_criteria.md   # Anxiety Unplugged group criteria
-    ├── worksheets/                # real worksheet content
-    └── message_templates.md      # tone/voice for agent messages
+    └── worksheets/
+        ├── index.json            # Session-to-worksheet mapping
+        ├── session-01-understanding-anxiety.md
+        ├── session-02-naming-triggers.md
+        ├── session-03-challenging-thoughts.md
+        └── ... (sessions 4-6 pending)
 ```
 
 ---
 
-## 4. Build Phases (21-Day Solo Plan)
+## 4. Build Phases — Progress
 
 ### Phase 0 — Setup ✅ (Done)
 - [x] Devpost registration
 - [x] Qwen Cloud account + API key
 - [x] First API call validated (Intake Agent prototype working)
-- [ ] GitHub repo created (public, MIT license)
+- [ ] GitHub repo created (public, MIT license) — **still todo**
 - [ ] OpenCode configured with Qwen Cloud provider
 
-### Phase 1 — Core Agents (Days 2–7)
-- [ ] `intake_agent.py` — formalize today's working prototype into a reusable function
-- [ ] `eligibility_criteria.md` — write out actual Anxiety Unplugged group criteria
-- [ ] `eligibility_agent.py` — reasoning agent that approves/flags/declines
-- [ ] `db/schema.sql` — participants, sessions, cohorts, agent_logs tables
-- [ ] Supabase project created, schema applied
-- [ ] `db_client.py` — simple connection + insert/query functions
+### Phase 1 — Core Agents ✅ (Done)
+- [x] `intake_agent.py` — formalized from prototype with crisis keyword fallback
+- [x] `eligibility_criteria.md` — inclusion/exclusion rules + crisis protocol
+- [x] `eligibility_agent.py` — Qwen-powered approve/flag/decline + urgent_flag
+- [x] `db/schema.sql` — participants, cohorts, eligibility_reviews, session_logs, agent_runs
+- [x] Supabase project created, schema applied, RLS disabled for hackathon
+- [x] `db_client.py` — full CRUD helpers
 
-### Phase 2 — Pipeline Chaining (Days 8–12)
-- [ ] `scheduling_agent.py` — cohort assignment + confirmation message generation
-- [ ] `pipeline/run_pipeline.py` — runs Intake → Eligibility → (approval gate) → Scheduling
-- [ ] Manual test: simulate 3–5 different inquiry types through the full pipeline
-- [ ] `pre_session_agent.py` — reminder + check-in message generator
-- [ ] `post_session_agent.py` — feedback collection + worksheet delivery + hours logging
+### Phase 2 — Pipeline Chaining ✅ (Done)
+- [x] `scheduling_agent.py` — cohort assignment + warm confirmation message
+- [x] `pipeline/run_pipeline.py` — Intake → Eligibility → (HITL gate) → Scheduling with:
+  - Crisis escalation (bypasses normal flow)
+  - `flagged_for_review` / `declined` pause with DB write
+  - Cohort enrollment auto-increment
+  - CLI: `--pending`, `--approve`, `--pre-session`, `--post-session`
+- [x] Manual test: standard anxiety (auto-approve), crisis (escalate), grief (flag for review)
+- [x] `pre_session_agent.py` — reminder + 1-10 check-in question
+- [x] `post_session_agent.py` — closing + worksheet reference + feedback + session log
 
-### Phase 3 — Dashboard + Polish (Days 13–17)
-- [ ] `dashboard/app.py` (Streamlit) — shows participant list, pending approvals, session logs
-- [ ] Real worksheet content added to `content/worksheets/`
-- [ ] Message tone pass — ensure all agent-generated text matches Unclutter's warm voice
+### Phase 3 — Dashboard + Polish ✅ (Done)
+- [x] `dashboard/app.py` (Streamlit) — 6 tabs: Overview, Participants, Pending Reviews, Cohorts, Session Logs, Agent Runs
+- [x] Real worksheet content: sessions 1-3 (CBT-based exercises)
+- [x] Message tone pass — prompts calibrated for warm, human voice
 - [ ] Deploy backend to Alibaba Cloud ECS
 - [ ] Record proof-of-deployment screen recording
 
 ### Phase 4 — Submission Assets (Days 18–21)
-- [ ] Architecture diagram finalized (already drafted — see `docs/architecture-diagram.png`)
+- [ ] Architecture diagram finalized (see `docs/info.html` for draft)
 - [ ] 3-minute demo video recorded and uploaded (YouTube, public)
 - [ ] README.md completed with setup instructions
-- [ ] Devpost write-up submitted (content already drafted — see `02-DEVPOST-WRITEUP.md`)
-- [ ] Optional: blog post written for Blog Post Award ($500)
+- [ ] Devpost write-up submitted (see `02-DEVPOST-WRITEUP.md`)
+- [ ] Optional: blog post for Blog Post Award ($500)
+- [ ] Remainder worksheets: sessions 4-6 in `content/worksheets/`
 - [ ] Final submission at least 24 hours before deadline (aim for July 8)
 
 ---
 
 ## 5. Tool Division (Solo Build, Multi-AI-Assistant Workflow)
 
-You're using three AI coding tools. Here's how to split work so they don't collide:
-
 | Tool | Best for | When to use it |
 |---|---|---|
-| **Claude Code** | Architecture review, debugging, prompt engineering for agents, code review, refactoring | Whenever you're stuck, reviewing a finished file, or designing agent prompt logic |
-| **OpenCode (w/ Qwen provider)** | Live-testing actual Qwen API calls, validating agent outputs against the real hackathon model | Every time you need to confirm an agent's prompt actually produces good Qwen output |
-| **Codex** | Fast boilerplate — DB schema, utility functions, repetitive CRUD, test scaffolding | Anything mechanical that doesn't need judgment calls |
-
-**Suggested workflow per agent file:**
-1. Use Claude Code to design the agent's prompt + logic structure
-2. Use Codex to scaffold the Python function shell + error handling boilerplate
-3. Use OpenCode to actually run it against Qwen Cloud and see real output
-4. Use Claude Code again to review/refine based on what Qwen actually returned
+| **Claude Code** | Architecture review, debugging, prompt engineering, code review | Stuck on logic, reviewing files, designing agent prompts |
+| **OpenCode (w/ Qwen provider)** | Live-testing actual Qwen API calls against the real hackathon model | Every time you need to confirm agent output quality |
+| **Codex** | Fast boilerplate — DB schema, utility functions, test scaffolding | Mechanical work with few judgment calls |
 
 ---
 
 ## 6. Definition of "Done" for the MVP Demo
 
-You do NOT need all five agents fully production-ready. For a winning hackathon demo,
-you need:
+1. ✅ Intake Agent — working, tested
+2. ✅ Eligibility Agent — working, grief case flagged for review in demo
+3. ✅ Scheduling Agent — generates confirmation, assigns cohort
+4. ✅ Dashboard — participant list, pending reviews, session logs, agent runs
+5. ⬜ 3-minute video narrating the real problem + showing agents end-to-end
 
-1. ✅ Intake Agent — working, tested (done)
-2. Eligibility Agent — working, with one human-approval flagged example in the demo
-3. Scheduling Agent — at minimum, generates a confirmation message (calendar API optional)
-4. A simple log/dashboard showing the data the agents created (even a clean printed table counts)
-5. A 3-minute video that narrates the real problem (your own experience running Anxiety Unplugged)
-   and shows these three agents working end-to-end
-
-Pre-Session and Post-Session agents are valuable additions if time allows, but are not
-required to score well on the judging criteria (Technical Depth 30%, Innovation 30%,
-Problem Value 25%, Presentation 15%).
+Pre-Session and Post-Session agents are built but optional for the demo timeline.
 
 ---
 
 ## 7. Companion Documents
 
-This plan references three other markdown files you should keep alongside it in VS Code:
-
 - `02-DEVPOST-WRITEUP.md` — full submission text, ready to copy into Devpost fields
 - `03-AGENT-SPECS.md` — detailed prompt design and expected I/O for each of the 5 agents
 - `04-DB-SCHEMA.md` — full Postgres schema with field definitions and rationale
-
----
-
-## 8. Immediate Next Action
-
-Open VS Code in your `careflow` project folder and:
-
-1. Create the folder structure above
-2. Move your working `hello_qwen.py` logic into `agents/intake_agent.py`, wrapped as a
-   function `run_intake_agent(message: str) -> dict`
-3. Write `content/eligibility_criteria.md` with your real Anxiety Unplugged criteria
-   (this unblocks the Eligibility Agent build)
-4. Initialize git, create `.gitignore` (must exclude `.env`), push to GitHub as a public repo

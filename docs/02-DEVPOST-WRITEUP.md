@@ -54,7 +54,7 @@ post-session workflow for group or individual therapists:
   edge cases for therapist review before any scheduling occurs (human-in-the-loop
   checkpoint).
 - **Scheduling Agent** — Assigns participants to available cohort slots, sends
-  confirmation messages with onboarding info, and updates the therapist's calendar
+  confirmation messages with onboarding info, and updates cohort enrollment
   automatically.
 - **Pre-Session Agent** — Sends reminders and short check-in questions 24 hours before
   each session. Surfaces participant mood data to the therapist before the session
@@ -62,23 +62,29 @@ post-session workflow for group or individual therapists:
 - **Post-Session Agent** — Delivers session worksheets, collects feedback, logs
   attendance, and updates the therapist's training hours tracker for licensing
   compliance.
-- **Therapist Dashboard** — A clean interface showing participant progress, cohort
-  overview, session logs, and training hours — with all data populated by the agents,
-  never manually entered.
+- **Therapist Dashboard** — A clean Streamlit interface showing participant progress,
+  cohort overview, session logs, pending reviews, and training hours — with all
+  data populated by the agents, never manually entered.
 
 ---
 
 ## How We Built It
 
-CareFlow is built on **Qwen Cloud infrastructure**, with Qwen powering the NLP
-reasoning across all five agent steps. The backend runs on **Alibaba Cloud ECS**.
-Each agent is a discrete Qwen API call with a carefully designed system prompt and
-structured JSON output, chained together into a pipeline.
+CareFlow is built on **Qwen Cloud infrastructure**, with Qwen-Max (`qwen3.7-plus`)
+powering the NLP reasoning across all five agent steps. Each agent is a discrete Qwen
+API call with a carefully designed system prompt and structured JSON output, chained
+together into a Python pipeline.
 
-Participant data and session logs are stored in **PostgreSQL via Supabase**.
-Communication with participants happens via WhatsApp/email. The therapist dashboard
-is built with [Streamlit / Next.js — update based on final build]. Calendar
-integration uses the Google Calendar API for slot management.
+Participant data and session logs are stored in **PostgreSQL via Supabase**. The
+pipeline runner orchestrates Intake → Eligibility → (human-in-the-loop gate) →
+Scheduling, with CLI commands for pending review management, pre-session reminders,
+and post-session logging. The therapist dashboard is built with **Streamlit** and
+reads directly from Supabase.
+
+A crisis keyword detection fallback runs alongside the Qwen-powered intake to ensure
+suicidal ideation and self-harm mentions are never missed by the model alone. The
+pipeline auto-escalates crisis cases to the therapist and blocks scheduling until
+human review.
 
 Each agent in the pipeline is designed so that any single agent can be paused,
 overridden, or extended without rebuilding the pipeline. This modularity means
@@ -148,11 +154,8 @@ expectations.
 ## Built With (Devpost Tags)
 
 ```
-qwen-cloud, qwen-api, alibaba-cloud, python, postgresql, supabase, streamlit,
-whatsapp-business-api, google-calendar-api
+qwen-cloud, qwen-api, alibaba-cloud, python, postgresql, supabase, streamlit
 ```
-
-*(Update this list to match your final actual stack before submitting.)*
 
 ---
 
