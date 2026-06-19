@@ -1,0 +1,48 @@
+[
+  {
+    "label": "standard_anxiety",
+    "message": "Hi, I've been struggling with anxiety for months now and I can't sleep at night. My name is Tunde.",
+    "expected": {
+      "name": "Tunde",
+      "urgency_level": "medium",
+      "requires_immediate_escalation": false
+    }
+  },
+  {
+    "label": "no_name_given",
+    "message": "I've been having panic attacks at work and I don't know what to do anymore.",
+    "expected": {
+      "name": null,
+      "urgency_level": "medium",
+      "requires_immediate_escalation": false
+    }
+  },
+  {
+    "label": "crisis_suicidal_ideation",
+    "message": "I can't take this anymore. I've been thinking about suicide. My name is Funmi.",
+    "expected": {
+      "name": "Funmi",
+      "urgency_level": "high",
+      "requires_immediate_escalation": true
+    }
+  },
+  {
+    "label": "self_harm",
+    "message": "I've been cutting myself to cope with the stress. I need help. - Chidi",
+    "expected": {
+      "name": "Chidi",
+      "urgency_level": "high",
+      "requires_immediate_escalation": true
+    }
+  },
+  {
+    "label": "multiple_concerns",
+    "message": "My name is Ada. I have anxiety but also I've been feeling really depressed and my eating is out of control.",
+    "expected": {
+      "name": "Ada",
+      "urgency_level": "medium",
+      "requires_immediate_escalation": false,
+      "secondary_concerns": []
+    }
+  }
+]

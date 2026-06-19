@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareFlow — Hackathon Pack</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --teal: #00c9a7;
+    --teal-dim: #00c9a720;
+    --teal-mid: #00c9a740;
+    --amber: #f5a623;
+    --amber-dim: #f5a62320;
+    --red: #ff5f57;
+    --blue: #4a9eff;
+    --blue-dim: #4a9eff20;
+    --text: #e8eaf0;
+    --text-muted: #7a8099;
+    --text-dim: #4a5068;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* NAV TABS */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+  }
+  .nav-tab {
+    padding: 16px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    user-select: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+  /* HEADER */
+  .header {
+    padding: 48px 32px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0d1520 0%, var(--bg) 100%);
+  }
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .header h1 span { color: var(--teal); }
+  .header-sub {
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 600px;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .badge-teal { background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-mid); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid #f5a62340; }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #4a9eff40; }
+
+  /* SECTIONS */
+  .section { display: none; padding: 40px 32px; max-width: 1100px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .section-heading {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+  }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    overflow-x: auto;
+  }
+
+  .arch-layer {
+    margin-bottom: 12px;
+  }
+  .arch-layer-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .arch-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .arch-node {
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+    min-width: 140px;
+    position: relative;
+  }
+  .arch-node-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .arch-node-sub { font-size: 11px; opacity: 0.7; }
+
+  .node-teal { background: var(--teal-dim); border: 1px solid var(--teal-mid); color: var(--teal); }
+  .node-amber { background: var(--amber-dim); border: 1px solid #f5a62340; color: var(--amber); }
+  .node-blue { background: var(--blue-dim); border: 1px solid #4a9eff40; color: var(--blue); }
+  .node-red { background: #ff5f5720; border: 1px solid #ff5f5740; color: var(--red); }
+  .node-purple { background: #9b6dff20; border: 1px solid #9b6dff40; color: #9b6dff; }
+  .node-gray { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); }
+
+  .arch-arrow {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 20px;
+    margin: 4px 0;
+    letter-spacing: 2px;
+  }
+  .arch-arrow-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .arch-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 20px 0;
+  }
+
+  /* FLOW STEPS */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 32px;
+  }
+  .flow-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: -12px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--teal-mid), transparent);
+  }
+  .flow-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-mid);
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .flow-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    flex: 1;
+    margin-bottom: 12px;
+  }
+  .flow-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .flow-content p { color: var(--text-muted); font-size: 13px; }
+  .flow-agent-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 8px;
+  }
+
+  /* SUBMISSION WRITE-UP */
+  .writeup-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .writeup-block h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .writeup-block p, .writeup-block li {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.75;
+    margin-bottom: 8px;
+  }
+  .writeup-block strong { color: var(--text); }
+  .writeup-block ul { padding-left: 20px; }
+
+  .copy-hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  /* BUILD PLAN */
+  .phase {
+    margin-bottom: 32px;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--teal);
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-mid);
+    border-radius: 4px;
+    padding: 3px 8px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .phase-header h3 { font-size: 17px; font-weight: 600; }
+  .phase-header .phase-days {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+
+  .task-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 640px) { .task-grid { grid-template-columns: 1fr; } }
+
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .task-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .task-owner {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+  .owner-you { background: var(--teal-dim); color: var(--teal); }
+  .owner-dev { background: var(--blue-dim); color: var(--blue); }
+  .owner-both { background: var(--amber-dim); color: var(--amber); }
+  .task-card h4 { font-size: 13px; font-weight: 600; }
+  .task-card p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .timeline-bar {
+    background: var(--surface2);
+    border-radius: 6px;
+    height: 6px;
+    margin: 20px 0 28px;
+    position: relative;
+    overflow: visible;
+  }
+  .timeline-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--teal), var(--blue));
+  }
+  .timeline-markers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .timeline-marker {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* TECH STACK TABLE */
+  .stack-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  .stack-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stack-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+  .stack-table td:first-child { color: var(--text); font-weight: 500; }
+  .stack-table tr:last-child td { border-bottom: none; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; padding: 0; margin-top: 16px; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-eyebrow">Qwen Cloud Global AI Hackathon · Track 4: Autopilot Agent</div>
+  <h1><span>CareFlow</span> — Autonomous Therapy<br>Intake & Session Agent</h1>
+  <p class="header-sub">An AI agent that handles the full pre- and post-session workflow for therapists — from first inquiry to session log — with zero manual admin.</p>
+  <div class="badge-row">
+    <span class="badge badge-teal">Track 4 · Autopilot Agent</span>
+    <span class="badge badge-amber">Mental Wellness · Unclutter</span>
+    <span class="badge badge-blue">$7,000 Cash Prize Target</span>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <div class="nav-tab active" onclick="showTab('arch')">Architecture</div>
+  <div class="nav-tab" onclick="showTab('writeup')">Devpost Write-up</div>
+  <div class="nav-tab" onclick="showTab('buildplan')">Build Plan</div>
+  <div class="nav-tab" onclick="showTab('submit')">Submission Checklist</div>
+</nav>
+
+<!-- ===== TAB 1: ARCHITECTURE ===== -->
+<div id="arch" class="section active">
+  <div class="section-title">System Design</div>
+  <div class="section-heading">Architecture Diagram</div>
+
+  <div class="arch-diagram">
+
+    <!-- INPUT LAYER -->
+    <div class="arch-layer">
+      <div class="arch-layer-label">Input Channels</div>
+      <div class="arch-row">
+        <div class="arch-node node-gray">
+          <div class="arch-node-title">WhatsApp</div>
+          <div class="arch-node-sub">Free-text inquiry via WhatsApp Business API</div>
+        </div>
+        <div class="arch-node node-gray">
+          <div class="arch-node-title">Web Form</div>
+          <div class="arch-node-sub">Unclutter intake form (Next.js)</div>
+        </div>
+        <div class="arch-node node-gray">
+          <div class="arch-node-title">Email</div>
+          <div class="arch-node-sub">Inbound email via SMTP / Gmail API</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+    <div class="arch-arrow-label">Raw inquiry → n8n webhook trigger</div>
+
+    <!-- ORCHESTRATION LAYER -->
+    <div class="arch-layer">
+      <div class="arch-layer-label">Orchestration Layer</div>
+      <div class="arch-row">
+        <div class="arch-node node-amber" style="flex: 2;">
+          <div class="arch-node-title">n8n Workflow Engine</div>
+          <div class="arch-node-sub">Routes messages between agents · manages state · triggers human-in-the-loop checkpoints · retry logic</div>
+        </div>
+        <div class="arch-node node-amber">
+          <div class="arch-node-title">Alibaba Cloud ECS</div>
+          <div class="arch-node-sub">Hosts n8n + all backend services · required deployment target</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+    <div class="arch-arrow-label">Parsed payload → Agent pipeline</div>
+
+    <!-- AGENT LAYER -->
+    <div class="arch-layer">
+      <div class="arch-layer-label">Agent Pipeline (Qwen-powered)</div>
+      <div class="arch-row">
+        <div class="arch-node node-teal">
+          <div class="arch-node-title">① Intake Agent</div>
+          <div class="arch-node-sub">Extracts name, concern, availability from free-text. Asks follow-up Qs via chat.</div>
+        </div>
+        <div class="arch-node node-teal">
+          <div class="arch-node-title">② Eligibility Agent</div>
+          <div class="arch-node-sub">Matches participant to group criteria. Flags edge cases for therapist review.</div>
+        </div>
+        <div class="arch-node node-teal">
+          <div class="arch-node-title">③ Scheduling Agent</div>
+          <div class="arch-node-sub">Assigns cohort slot. Sends confirmation + onboarding message. Updates calendar.</div>
+        </div>
+        <div class="arch-node node-teal">
+          <div class="arch-node-title">④ Pre-Session Agent</div>
+          <div class="arch-node-sub">Sends 24hr reminder + pre-session check-in questions. Logs responses.</div>
+        </div>
+        <div class="arch-node node-teal">
+          <div class="arch-node-title">⑤ Post-Session Agent</div>
+          <div class="arch-node-sub">Collects feedback. Delivers worksheet. Logs attendance + hours for therapist.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↓</div>
+
+    <!-- QWEN + DATA LAYER -->
+    <div class="arch-layer">
+      <div class="arch-layer-label">Intelligence & Data</div>
+      <div class="arch-row">
+        <div class="arch-node node-blue">
+          <div class="arch-node-title">Qwen Cloud API</div>
+          <div class="arch-node-sub">NLP parsing · eligibility reasoning · session summaries · multimodal input support</div>
+        </div>
+        <div class="arch-node node-purple">
+          <div class="arch-node-title">Postgres (Supabase)</div>
+          <div class="arch-node-sub">Participant records · session logs · cohort slots · agent state</div>
+        </div>
+        <div class="arch-node node-gray">
+          <div class="arch-node-title">Google Calendar API</div>
+          <div class="arch-node-sub">Session slot availability · automated booking</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+
+    <!-- OUTPUT LAYER -->
+    <div class="arch-layer">
+      <div class="arch-layer-label">Human-in-the-Loop Checkpoints + Outputs</div>
+      <div class="arch-row">
+        <div class="arch-node node-red">
+          <div class="arch-node-title">🔴 Eligibility Review</div>
+          <div class="arch-node-sub">Therapist approves or declines flagged participants before scheduling proceeds</div>
+        </div>
+        <div class="arch-node node-blue">
+          <div class="arch-node-title">Therapist Dashboard</div>
+          <div class="arch-node-sub">Session logs · participant progress · training hours tracker · cohort overview</div>
+        </div>
+        <div class="arch-node node-gray">
+          <div class="arch-node-title">Participant Comms</div>
+          <div class="arch-node-sub">Automated WhatsApp/email: confirmations · reminders · worksheets · feedback forms</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- WORKFLOW FLOW -->
+  <div class="section-title" style="margin-top: 48px;">End-to-End Flow</div>
+  <div class="section-heading" style="margin-bottom: 0;">How a participant moves through CareFlow</div>
+
+  <div class="flow-steps">
+
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-content">
+        <span class="flow-agent-tag badge-teal" style="background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-mid);">Intake Agent</span>
+        <h4>Free-text inquiry arrives</h4>
+        <p>Someone texts "I've been struggling with anxiety, can't sleep" via WhatsApp. The Intake Agent parses the message using Qwen NLP, identifies presenting concern, and begins a structured conversation to collect name, availability, and session preference — without asking a form-style questionnaire.</p>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-content">
+        <span class="flow-agent-tag" style="background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-mid);">Eligibility Agent</span>
+        <h4>Screening & matching</h4>
+        <p>The Eligibility Agent checks the participant against group criteria (e.g., anxiety focus, age range, no active crisis). Straightforward matches proceed automatically. Edge cases are flagged to the therapist dashboard for manual review — the human-in-the-loop checkpoint.</p>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-content">
+        <span class="flow-agent-tag" style="background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-mid);">Scheduling Agent</span>
+        <h4>Cohort assignment & confirmation</h4>
+        <p>Once approved, the Scheduling Agent checks available cohort slots, assigns the participant, updates the calendar, and sends a confirmation message with onboarding information — all within seconds of therapist approval.</p>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-content">
+        <span class="flow-agent-tag" style="background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-mid);">Pre-Session Agent</span>
+        <h4>24-hour preparation sequence</h4>
+        <p>The night before each session, the Pre-Session Agent sends a reminder, a short check-in ("How are you feeling today on a scale of 1–10?"), and any preparatory materials. Responses are logged and surfaced to the therapist before the session starts.</p>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-content">
+        <span class="flow-agent-tag" style="background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-mid);">Post-Session Agent</span>
+        <h4>Automated session close</h4>
+        <p>After each session, the Post-Session Agent sends a feedback form, delivers the week's worksheet, marks attendance, and logs the session to the therapist's training hours tracker — creating a full audit trail for licensing compliance.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section-title" style="margin-top: 48px;">Technology</div>
+  <div class="section-heading" style="margin-bottom: 0;">Tech Stack</div>
+  <div class="writeup-block" style="margin-top: 20px;">
+    <table class="stack-table">
+      <tr><th>Layer</th><th>Technology</th><th>Role</th></tr>
+      <tr><td>AI Intelligence</td><td>Qwen Cloud API (Qwen-Max / Qwen-VL)</td><td>NLP parsing, eligibility reasoning, session summaries, multimodal intake support</td></tr>
+      <tr><td>Deployment</td><td>Alibaba Cloud ECS</td><td>Backend hosting — required for submission</td></tr>
+      <tr><td>Orchestration</td><td>n8n (self-hosted on ECS)</td><td>Agent workflow routing, state management, retry logic, webhook triggers</td></tr>
+      <tr><td>Database</td><td>Postgres (Supabase)</td><td>Participant records, session logs, cohort slots, agent state</td></tr>
+      <tr><td>Frontend</td><td>Next.js (Vercel or ECS)</td><td>Therapist dashboard, intake web form</td></tr>
+      <tr><td>Comms</td><td>WhatsApp Business API + SMTP</td><td>Participant communication across all agent steps</td></tr>
+      <tr><td>Calendar</td><td>Google Calendar API</td><td>Session availability, automated booking</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<!-- ===== TAB 2: DEVPOST WRITE-UP ===== -->
+<div id="writeup" class="section">
+  <div class="section-title">Ready to copy into Devpost</div>
+  <div class="section-heading">Submission Write-up</div>
+
+  <div class="writeup-block">
+    <h3>Project Name</h3>
+    <p><strong>CareFlow</strong></p>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Track</h3>
+    <p><strong>Track 4: Autopilot Agent</strong></p>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Short Description (for Devpost tagline)</h3>
+    <p class="copy-hint">↳ use in the one-line description field</p>
+    <p>CareFlow is an autonomous AI agent that handles the full therapy intake and session management workflow — from first message to session log — so therapists can focus entirely on their clients.</p>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Inspiration</h3>
+    <p>Mental health therapists spend a significant portion of their working time on administrative work that never helps a single client: chasing intake forms, manually scheduling cohort groups, sending reminders, collecting session feedback, and updating training logs for licensing compliance. For therapists in training — who need to document every client hour to meet licensing requirements — this burden is especially acute.</p>
+    <p>We built CareFlow because we experienced this problem firsthand. Running a group therapy program called <em>Anxiety Unplugged</em> — a six-week anxiety recovery series — we found that the logistics of intake, scheduling, and post-session follow-up consumed hours that should have gone toward preparation and presence. CareFlow automates that entire operational layer, so a therapist can take on more clients, document hours accurately, and deliver better care without drowning in admin.</p>
+  </div>
+
+  <div class="writeup-block">
+    <h3>What It Does</h3>
+    <p>CareFlow is a multi-step autonomous agent pipeline that manages the complete pre- and post-session workflow for group or individual therapists:</p>
+    <ul>
+      <li><strong>Intake Agent:</strong> Receives free-text inquiries via WhatsApp, web form, or email. Uses Qwen NLP to extract presenting concern, name, and availability through a natural conversation — no rigid forms.</li>
+      <li><strong>Eligibility Agent:</strong> Screens participants against group therapy criteria. Flags edge cases for therapist review before any scheduling occurs (human-in-the-loop checkpoint).</li>
+      <li><strong>Scheduling Agent:</strong> Assigns participants to available cohort slots, sends confirmation messages with onboarding info, and updates the therapist's calendar automatically.</li>
+      <li><strong>Pre-Session Agent:</strong> Sends reminders and short check-in questions 24 hours before each session. Surfaces participant mood data to the therapist before the session starts.</li>
+      <li><strong>Post-Session Agent:</strong> Delivers session worksheets, collects feedback, logs attendance, and updates the therapist's training hours tracker for licensing compliance.</li>
+      <li><strong>Therapist Dashboard:</strong> A clean Next.js interface showing participant progress, cohort overview, session logs, and training hours — with all data populated by the agents, never manually entered.</li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>How We Built It</h3>
+    <p>CareFlow is built on <strong>Qwen Cloud infrastructure</strong>, with Qwen-Max powering the NLP reasoning across all five agent steps. The backend runs on <strong>Alibaba Cloud ECS</strong>, hosting a self-deployed <strong>n8n instance</strong> that orchestrates the agent workflow — routing messages between agents, managing state, handling retries, and triggering the human-in-the-loop approval checkpoint.</p>
+    <p>Participant data and session logs are stored in <strong>PostgreSQL via Supabase</strong>. Communication with participants happens via the <strong>WhatsApp Business API and SMTP email</strong>. The therapist dashboard and intake form are built with <strong>Next.js</strong>. Calendar integration uses the <strong>Google Calendar API</strong> for slot management and automated booking.</p>
+    <p>Each agent in the pipeline is a discrete Qwen API call with structured tool use — designed so that any single agent can be paused, overridden, or extended without rebuilding the pipeline. This modularity means CareFlow can be adapted to individual therapy, peer support groups, or institutional mental health services.</p>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Challenges We Ran Into</h3>
+    <ul>
+      <li><strong>Ambiguous free-text intake:</strong> Real inquiries are messy — people describe mental health concerns in personal, sometimes vague language. Prompt engineering the Intake Agent to extract structured data without being clinical or cold required significant iteration.</li>
+      <li><strong>Eligibility edge cases:</strong> Some participants present with concerns that are adjacent to the group's focus but not a clean match. Building an agent that reasons about these cases probabilistically — and knows when to escalate — was the most technically nuanced part of the build.</li>
+      <li><strong>State management across sessions:</strong> Because the workflow spans days (intake → session 1 → session 2 → session 6), maintaining coherent participant state across n8n runs required careful schema design and idempotent agent logic.</li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Accomplishments We're Proud Of</h3>
+    <ul>
+      <li>A fully end-to-end pipeline from raw WhatsApp message to confirmed session booking, requiring zero therapist input for standard cases.</li>
+      <li>A human-in-the-loop checkpoint architecture that keeps the therapist in control of clinical decisions without burdening them with operational ones.</li>
+      <li>A training hours tracker that automatically generates the documentation therapists-in-training need for licensing — a genuine time-saver with real professional stakes.</li>
+      <li>A culturally-grounded intake experience: the agent's conversational style was calibrated for warmth and accessibility, not clinical distance — reflecting the values of the Unclutter mental wellness platform it's built for.</li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>What We Learned</h3>
+    <p>Building CareFlow taught us that the hardest part of agentic AI for sensitive domains isn't the AI capability — it's the design of escalation. Knowing when an agent should proceed autonomously and when it must pause for a human is a product decision as much as a technical one. Getting that boundary right in a mental health context required us to think carefully about risk, consent, and clinical responsibility in ways that generic automation frameworks don't account for.</p>
+    <p>We also learned how powerful Qwen's reasoning models are for structured extraction from conversational text — the quality of intake parsing significantly exceeded our expectations.</p>
+  </div>
+
+  <div class="writeup-block">
+    <h3>What's Next for CareFlow</h3>
+    <ul>
+      <li>Integration with the full <strong>Unclutter app suite</strong> as the operational backbone for all group therapy programs</li>
+      <li><strong>Voice intake</strong> using Qwen's multimodal capabilities — so participants can leave a voice note describing their situation rather than typing</li>
+      <li><strong>Outcome tracking</strong> — longitudinal mood and progress data surfaced to therapists across a participant's full program journey</li>
+      <li>An <strong>open-source release</strong> of the core agent pipeline, enabling other therapists and mental health organisations to deploy CareFlow for their own programs</li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Built With (Devpost tags)</h3>
+    <p>qwen-cloud · qwen-api · alibaba-cloud · n8n · nextjs · postgresql · supabase · whatsapp-business-api · google-calendar-api · nodejs</p>
+  </div>
+
+</div>
+
+<!-- ===== TAB 3: BUILD PLAN ===== -->
+<div id="buildplan" class="section">
+  <div class="section-title">From zero to submission</div>
+  <div class="section-heading">Build Plan</div>
+
+  <div class="writeup-block" style="margin-bottom: 32px;">
+    <h3>Timeline Overview</h3>
+    <div class="timeline-bar">
+      <div class="timeline-fill" style="width: 100%;"></div>
+    </div>
+    <div class="timeline-markers">
+      <span class="timeline-marker">Now · June 18</span>
+      <span class="timeline-marker">Phase 1 · Week 1</span>
+      <span class="timeline-marker">Phase 2 · Week 2</span>
+      <span class="timeline-marker">Phase 3 · Week 3</span>
+      <span class="timeline-marker">Deadline · Jul 9</span>
+    </div>
+    <p style="margin-top: 20px; color: var(--text-muted); font-size: 13px;">You have approximately <strong style="color: var(--text);">21 days</strong> to deadline. Owner tags: <span class="task-owner owner-you">YOU</span> = Olalekan &nbsp; <span class="task-owner owner-dev">DEV</span> = tech collaborator &nbsp; <span class="task-owner owner-both">BOTH</span> = together</p>
+  </div>
+
+  <!-- PHASE 0 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">PHASE 0</div>
+      <h3>Setup & Accounts</h3>
+      <span class="phase-days">Days 1–2</span>
+    </div>
+    <div class="task-grid">
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-both">BOTH</span>
+          <h4>Register on Devpost</h4>
+        </div>
+        <p>Both you and your dev collaborator register and join the hackathon. One of you will be the project lead.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Qwen Cloud account + credits</h4>
+        </div>
+        <p>Sign up at qwencloud.com, apply for hackathon credits via the coupon form. Join the Discord.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Alibaba Cloud ECS instance</h4>
+        </div>
+        <p>Spin up an ECS instance. This is the required deployment target. Install n8n via Docker.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-both">BOTH</span>
+          <h4>GitHub repo (public, open source)</h4>
+        </div>
+        <p>Create a public repo with MIT license visible in the About section. This is a submission requirement.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">PHASE 1</div>
+      <h3>Database Schema & Agent Foundations</h3>
+      <span class="phase-days">Days 3–7</span>
+    </div>
+    <div class="task-grid">
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Postgres schema design</h4>
+        </div>
+        <p>Tables: participants, sessions, cohorts, agent_logs, therapist_hours. Design for idempotent agent writes.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Qwen API integration spike</h4>
+        </div>
+        <p>Test Qwen-Max with a sample intake message. Confirm NLP extraction quality. Tune system prompt.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>Intake criteria definition</h4>
+        </div>
+        <p>Define what makes someone eligible for Anxiety Unplugged. Write the eligibility rules the agent will reason from. You know this from your clinical experience.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>Conversation scripts for agents</h4>
+        </div>
+        <p>Write the tone and sample messages for Intake Agent, Pre-Session check-in, and Post-Session feedback. These feed directly into Qwen system prompts.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">PHASE 2</div>
+      <h3>Agent Pipeline Build</h3>
+      <span class="phase-days">Days 8–14</span>
+    </div>
+    <div class="task-grid">
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Intake Agent (n8n + Qwen)</h4>
+        </div>
+        <p>Webhook trigger from WhatsApp/form → Qwen extraction → structured participant record written to Postgres.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Eligibility Agent + HITL gate</h4>
+        </div>
+        <p>Qwen eligibility reasoning → auto-approve or flag for therapist. Build the approval endpoint the dashboard calls.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Scheduling Agent + Calendar API</h4>
+        </div>
+        <p>Slot lookup → cohort assignment → Google Calendar booking → confirmation message via WhatsApp/email.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Pre & Post Session Agents</h4>
+        </div>
+        <p>Cron-triggered n8n flows. Pre: reminder + check-in. Post: worksheet delivery + feedback form + session log write.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-both">BOTH</span>
+          <h4>End-to-end pipeline test</h4>
+        </div>
+        <p>Run a full test scenario from raw inquiry to post-session log. You play the participant, dev monitors logs. Document issues.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>Worksheet & resource content</h4>
+        </div>
+        <p>Provide the actual Anxiety Unplugged worksheets the Post-Session Agent will deliver. Real content makes the demo authentic.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">PHASE 3</div>
+      <h3>Dashboard, Demo & Submission</h3>
+      <span class="phase-days">Days 15–21</span>
+    </div>
+    <div class="task-grid">
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Therapist dashboard (Next.js)</h4>
+        </div>
+        <p>Session log view, participant list, cohort overview, training hours tracker, eligibility approval queue.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>Architecture diagram (final)</h4>
+        </div>
+        <p>Export the diagram from this pack and refine for submission. Required in Devpost submission.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>3-minute demo video</h4>
+        </div>
+        <p>Record the full scenario: WhatsApp inquiry → agent pipeline → confirmed booking → post-session log. Upload to YouTube. This is your strongest asset.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-dev">DEV</span>
+          <h4>Proof of Alibaba Cloud deployment</h4>
+        </div>
+        <p>Short screen recording showing the backend running on ECS + a code file using Alibaba Cloud APIs. Link in repo. Required.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>Devpost write-up submission</h4>
+        </div>
+        <p>Copy from the write-up tab in this doc. Paste into Devpost fields. Add repo link, video link, architecture diagram.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-owner owner-you">YOU</span>
+          <h4>Blog post (optional $500 prize)</h4>
+        </div>
+        <p>Write a LinkedIn or Medium post about building CareFlow on Qwen Cloud. Tag Qwen Cloud. Submit the link for the Blog Post Award — easy $500.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TAB 4: CHECKLIST ===== -->
+<div id="submit" class="section">
+  <div class="section-title">Before you hit submit</div>
+  <div class="section-heading">Submission Checklist</div>
+
+  <div class="writeup-block">
+    <h3>Required Items</h3>
+    <ul class="checklist">
+      <li><div class="check-box"></div><div><strong>Public GitHub repo</strong> — all source code, open-source license (MIT) visible in About section</div></li>
+      <li><div class="check-box"></div><div><strong>Alibaba Cloud deployment proof</strong> — short recording showing backend running on ECS + code file using Alibaba Cloud APIs in the repo</div></li>
+      <li><div class="check-box"></div><div><strong>Architecture diagram</strong> — clear visual showing Qwen Cloud → backend → database → frontend connections</div></li>
+      <li><div class="check-box"></div><div><strong>3-minute demo video</strong> — uploaded to YouTube/Vimeo/Facebook, set to public</div></li>
+      <li><div class="check-box"></div><div><strong>Text description</strong> — features and functionality of the project (use write-up tab)</div></li>
+      <li><div class="check-box"></div><div><strong>Track selection</strong> — Track 4: Autopilot Agent</div></li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Optional (but worth doing)</h3>
+    <ul class="checklist">
+      <li><div class="check-box"></div><div><strong>Blog post URL</strong> — LinkedIn or Medium post about building with Qwen Cloud → eligible for $500 Blog Post Award</div></li>
+      <li><div class="check-box"></div><div><strong>README.md</strong> — setup instructions, environment variables, how to run locally. Strong docs improve judging score.</div></li>
+      <li><div class="check-box"></div><div><strong>Architecture diagram in repo</strong> — include the diagram as a PNG or PDF in /docs folder of the repo</div></li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Judging Self-Score Check</h3>
+    <ul class="checklist">
+      <li><div class="check-box"></div><div><strong>Technical Depth (30%)</strong> — Are you using Qwen tool use / structured outputs? Custom prompts per agent? n8n MCP integration? ✓ Yes</div></li>
+      <li><div class="check-box"></div><div><strong>Innovation (30%)</strong> — Is mental health agent automation novel on this platform? Is the HITL eligibility gate non-trivial? ✓ Yes</div></li>
+      <li><div class="check-box"></div><div><strong>Problem Value (25%)</strong> — Is this a real pain point with real users? Is there a path to production? ✓ Unclutter is live</div></li>
+      <li><div class="check-box"></div><div><strong>Presentation (15%)</strong> — Does the demo video clearly show the key agent logic? Is the architecture diagram legible? ✓ Check before submitting</div></li>
+    </ul>
+  </div>
+
+  <div class="writeup-block">
+    <h3>Deadline</h3>
+    <p><strong style="color: var(--red);">July 9, 2026 @ 2:00pm PDT</strong> — that's roughly 21 days from today. Submit at least 24 hours early to avoid last-minute issues with the Devpost form.</p>
+  </div>
+
+</div>
+
+<script>
+  function showTab(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
